@@ -8,14 +8,17 @@
 # install standalone: https://neo4j.com/docs/operations-manual/current/tools/cypher-shell/).
 #
 # Usage:
-#   ./scripts/load-data.sh [bolt-uri] [username] [password]
-#   NEO4J_URI=bolt://localhost:7687 NEO4J_USERNAME=neo4j NEO4J_PASSWORD=secret ./scripts/load-data.sh
+#   ./scripts/load-data.sh <bolt-uri> <username> <password>
+#   ./scripts/load-data.sh bolt://<your-uri>:7687 neo4j <your-password>
+#
+# Or set NEO4J_URI / NEO4J_USERNAME / NEO4J_PASSWORD as environment
+# variables instead of passing them as arguments.
 
 set -euo pipefail
 
-URI="${1:-${NEO4J_URI:-bolt://localhost:7687}}"
-USERNAME="${2:-${NEO4J_USERNAME:-neo4j}}"
-PASSWORD="${3:-${NEO4J_PASSWORD:-}}"
+URI="${1:-${NEO4J_URI:<your-uri>}}"
+USERNAME="${2:-${NEO4J_USERNAME:<your-ursername>}}"
+PASSWORD="${3:-${NEO4J_PASSWORD:<your-password>}}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CYPHER_DIR="$SCRIPT_DIR/../cypher"

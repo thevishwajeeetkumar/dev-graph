@@ -7,12 +7,15 @@
 # install standalone: https://neo4j.com/docs/operations-manual/current/tools/cypher-shell/).
 #
 # Usage:
-#   .\scripts\load-data.ps1 [-Uri bolt://localhost:7687] [-Username neo4j] [-Password secret]
+#   .\scripts\load-data.ps1 -Uri bolt://<your-uri>:7687 -Username neo4j -Password <your-password>
+#
+# Or set NEO4J_URI / NEO4J_USERNAME / NEO4J_PASSWORD as environment
+# variables instead of passing them as parameters.
 
 param(
-    [string]$Uri = $(if ($env:NEO4J_URI) { $env:NEO4J_URI } else { "bolt://localhost:7687" }),
-    [string]$Username = $(if ($env:NEO4J_USERNAME) { $env:NEO4J_USERNAME } else { "neo4j" }),
-    [string]$Password = $(if ($env:NEO4J_PASSWORD) { $env:NEO4J_PASSWORD } else { "" })
+    [string]$Uri = $(if ($env:NEO4J_URI) { $env:NEO4J_URI } else { "//<your-uri>" }),
+    [string]$Username = $(if ($env:NEO4J_USERNAME) { $env:NEO4J_USERNAME } else { "<your-ursername>" }),
+    [string]$Password = $(if ($env:NEO4J_PASSWORD) { $env:NEO4J_PASSWORD } else { "<your-password>" })
 )
 
 $ErrorActionPreference = "Stop"
