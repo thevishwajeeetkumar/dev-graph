@@ -1,0 +1,83 @@
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-stacktrace: never
+    include-exception: false
+    include-message: never
+    include-binding-errors: never
+
+spring:
+  application:
+    name: devgraph
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+  output:
+    ansi:
+      # Boot's default console pattern is already color-coded by level
+      # (ERROR red, WARN yellow, INFO green, ...); ANSI just isn't always
+      # auto-detected correctly (IDE consoles, some Windows terminals,
+      # non-tty subprocess output). Force it on for local/dev readability;
+      # override to NEVER via SPRING_OUTPUT_ANSI_ENABLED for log
+      # aggregators that don't want raw escape codes in captured output.
+      enabled: ${SPRING_OUTPUT_ANSI_ENABLED:ALWAYS}
+
+# CognoDB is a graph database exposed over the Bolt 5.x protocol. Connection
+# details MUST come from the environment (see .env.example) - the defaults
+# below only work against a local dev instance and must never point at a
+# real deployment.
+cognodb:
+  uri: ${NEO4J_URI:bolt+s://db-c8b2edbf.databases.cognodb.com}
+  username: ${NEO4J_USERNAME:cognodb}
+  password: ${NEO4J_PASSWORD:ff9346a8bcddb8ef6df53b49dda4ca55}
+  pool:
+    max-connection-pool-size: ${NEO4J_POOL_MAX_SIZE:50}
+    connection-acquisition-timeout-seconds: ${NEO4J_POOL_ACQUISITION_TIMEOUT_SECONDS:30}
+    max-connection-lifetime-minutes: ${NEO4J_POOL_MAX_LIFETIME_MINUTES:60}
+    connection-timeout-seconds: ${NEO4J_CONNECTION_TIMEOUT_SECONDS:10}
+
+devgraph:
+  seed:
+    enabled: ${DEVGRAPH_SEED_ENABLED:false}
+    # DANGER: wipes every node/relationship in the graph before reseeding.
+    # Only ever meant for a scratch/dev database.
+    reset: ${DEVGRAPH_SEED_RESET:false}
+
+app:
+  cors:
+    # Comma-separated list. Never set to "*" in production - lock this down
+    # to the exact frontend origin(s) that are allowed to call this API.
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # Only "health" is exposed - never blanket-expose actuator (env,
+        # beans, heapdump, etc leak internals and are a common misconfig).
+        include: health
+  endpoint:
+    health:
+      # Unauthenticated callers only ever see the bare UP/DOWN status, never
+      # the per-component detail (there's no Spring Security on the
+      # classpath to gate "authorized" any other way).
+      show-details: when-authorized
+      probes:
+        enabled: true
+      group:
+        readiness:
+          # CognoDB reachability gates readiness (should this instance get
+          # traffic), not liveness (should this instance be killed) - a
+          # transient DB blip shouldn't cause an orchestrator to restart
+          # the pod, only to stop routing to it until it recovers.
+          include: readinessState,cognoDb
+  health:
+    readiness-state:
+      enabled: true
+
+logging:
+  level:
+    root: WARN
+    com.devgraph: ${LOG_LEVEL:INFO}
