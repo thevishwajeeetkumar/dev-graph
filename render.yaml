@@ -5,7 +5,7 @@ services:
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     plan: free
-    healthCheckPath: /actuator/health
+    healthCheckPath: /actuator/health/readiness
     envVars:
       - key: NEO4J_URI
         sync: false
